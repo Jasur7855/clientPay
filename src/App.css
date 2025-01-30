@@ -1,0 +1,64 @@
+.App {
+}
+.App .logo {
+  height: 70px;
+  padding: 20px 26px;
+  border-bottom: 2px solid black;
+}
+.opacity{
+  opacity: 0.3;
+}
+.main {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: url("/public/image/bg$left.png") no-repeat left bottom,
+    url("/public/image/bg$Right.png") no-repeat right top 20px;
+  padding: 40px 26px;
+}
+.checkImg {
+  display: block;
+  width: 340px;
+  height: 120px;
+  margin: 0 auto 30px;
+}
+.yellow {
+  background-color: #fafa74;
+  padding: 20px;
+  color: black;
+}
+
+p {
+  margin-bottom: 8px;
+}
+h3 {
+  font-size: 24px;
+}
+
+.paymentContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 340px;
+  margin: 0 auto;
+}
+.timer{
+  width: 340px;
+  margin: 0 auto;
+
+  position: relative;
+}
+.timer .disabled{
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color:green;
+  background-color: rgba(226, 226, 226, 0.5);
+  width: 100%;
+  height: 100%;
+}
+@media (max-width: 975px) {
+  .main {
+    background: none;
+  }
+}
