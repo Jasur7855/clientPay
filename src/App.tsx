@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./App.css";
 import { TextContainer } from "./components/textContainer/TextContainer";
 import { PayButton } from "./components/PayButton/PayButton";
@@ -15,7 +15,9 @@ const getUrlParam = (): string | null => {
 function App() {
   const [offer, setOffer] = useState<boolean>(false);
   const [isTimeOut, setIsTimeOut] = useState(false);
-
+  const numberWithSpaces = function (x:number):string {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
   const id = getUrlParam();
   const { data } = useGetInvoiceByIdQuery(id as string);
 
@@ -31,7 +33,7 @@ function App() {
 
   return (
     <div className="App">
-      <img className="logo" src="/public/image/Group.svg" alt="" />
+      <img className="logo" src="/image/Group.svg" alt="" />
       <div className="main">
         <img src="/public/image/Header.png" alt="" className="checkImg" />
         {data?.data && deadline && (
@@ -56,19 +58,19 @@ function App() {
           />
           <TextContainer
             subTitle="Общая стоимость обучения:"
-            title={`${data?.data.final_price} СУМ`}
+            title={`${numberWithSpaces(data?.data.final_price??0)} СУМ`}
           />
           <TextContainer
             subTitle="Сумма к оплате:"
-            title={`${data?.data.sum} СУМ`}
+            title={`${numberWithSpaces(data?.data.sum??0)} СУМ`}
             textClass="yellow"
           />
           <TextContainer
             subTitle="Остаток:"
-            title={`${data?.data.remainder} СУМ`}
+            title={`${numberWithSpaces(data?.data.remainder??0)} СУМ`}
           />
 
-          <AgreeOffer isChecked={offer} link="#" onChange={handleOfferChange} />
+          <AgreeOffer isChecked={offer} link="https://thnkm.uz/oferta" onChange={handleOfferChange} />
           {offer && !isTimeOut && (
             <div className="paymentContainer">
               <PayButton img="/svg/Payment1.svg" />

@@ -11,7 +11,7 @@ export const AgreeOffer = ({ isChecked, onChange, link }: IAgreeOffer) => {
     <SAgreeOffer >
       <input type="checkbox" checked={isChecked} onChange={onChange} />
       <h4>
-        Я согласен(-на) с условиями <a href={link}>публичной оферты</a>
+        Я согласен(-на) с условиями <a target="_blank" href={link}>публичной оферты</a>
       </h4>
     </SAgreeOffer>
   );

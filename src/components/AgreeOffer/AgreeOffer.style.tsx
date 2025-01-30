@@ -14,6 +14,7 @@ export const SAgreeOffer = styled.div`
     margin-bottom: 24px;
     a {
       text-decoration: underline;
+      color: black;
     }
   }
 `;
