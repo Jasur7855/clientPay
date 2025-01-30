@@ -29,7 +29,7 @@ export const HiddenCheckbox = styled.input.attrs({ type: "checkbox" })`
 export const StyledCheckbox = styled.div<{ checked: boolean }>`
   width: 24px;
   height: 24px;
-  
+  cursor: pointer;
   border: 2px solid black;
   display: flex;
   align-items: center;
