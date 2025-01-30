@@ -35,7 +35,7 @@ function App() {
     <div className="App">
       <img className="logo" src="/image/Group.svg" alt="" />
       <div className="main">
-        <img src="/public/image/Header.png" alt="" className="checkImg" />
+        <img src="/image/Header.png" alt="" className="checkImg" />
         {data?.data && deadline && (
           <SaleTime
             saleFinish={deadline}
