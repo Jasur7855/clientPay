@@ -5,35 +5,45 @@ import { PayButton } from "./components/PayButton/PayButton";
 import SaleTime from "./components/SaleTime/SaleTime";
 import { AgreeOffer } from "./components/AgreeOffer/AgreeOffer";
 import { useGetInvoiceByIdQuery } from "./store/Api/paymentApi";
+
 const getUrlParam = (): string | null => {
   const path = window.location.pathname;
   const segments = path.split("/");
-  const lastSegment = segments.pop();
-  return lastSegment ? lastSegment : null;
+  return segments.pop() || null;
 };
+
 function App() {
   const [offer, setOffer] = useState<boolean>(false);
   const [isTimeOut, setIsTimeOut] = useState(false);
+
   const id = getUrlParam();
   const { data } = useGetInvoiceByIdQuery(id as string);
+
+  let deadline: string | null = null;
+  if (data?.data?.deadline) {
+    const timestamp = Number(data.data.deadline) * 1000;
+    deadline = new Date(timestamp).toISOString();
+  }
+
   const handleOfferChange = () => {
     setOffer(!offer);
   };
+
   return (
     <div className="App">
       <img className="logo" src="/public/image/Group.svg" alt="" />
       <div className="main">
         <img src="/public/image/Header.png" alt="" className="checkImg" />
-        {data?.data && (
+        {data?.data && deadline && (
           <SaleTime
+            saleFinish={deadline}
             saleStatus="saleTime"
-            saleDate={data?.data.created_at}
             complate={() => setIsTimeOut(true)}
             timeOut={isTimeOut}
           />
         )}
 
-        <div className={`timer ${isTimeOut && "opacity"}`}>
+        <div className={`timer ${isTimeOut ? "opacity" : ""}`}>
           {isTimeOut && <div className="disabled" />}
 
           <TextContainer
@@ -42,21 +52,22 @@ function App() {
           />
           <TextContainer
             subTitle="Курс и номер потока:"
-            title={`${data?.data.course_name} / ${data?.data.thread} `}
+            title={`${data?.data.course_name} / ${data?.data.thread}`}
           />
           <TextContainer
             subTitle="Общая стоимость обучения:"
-            title={`${data?.data.final_price} СУМ `}
+            title={`${data?.data.final_price} СУМ`}
           />
           <TextContainer
             subTitle="Сумма к оплате:"
-            title={`${data?.data.sum} СУМ `}
+            title={`${data?.data.sum} СУМ`}
             textClass="yellow"
           />
           <TextContainer
             subTitle="Остаток:"
-            title={`${data?.data.remainder} СУМ `}
+            title={`${data?.data.remainder} СУМ`}
           />
+
           <AgreeOffer isChecked={offer} link="#" onChange={handleOfferChange} />
           {offer && !isTimeOut && (
             <div className="paymentContainer">
