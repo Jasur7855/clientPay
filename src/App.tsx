@@ -74,8 +74,8 @@ function App() {
           {offer && !isTimeOut && (
             <div className="paymentContainer">
               <PayButton img="/svg/Payment1.svg" />
-              <PayButton img="/svg/Payment2.svg" />
-              <PayButton img="/svg/Payment3.svg" />
+              {/* <PayButton img="/svg/Payment2.svg" />
+              <PayButton img="/svg/Payment3.svg" /> */}
             </div>
           )}
         </div>
