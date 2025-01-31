@@ -5,7 +5,7 @@ interface IPayButton {
 export const PayButton = ({ img }:IPayButton) => {
   return (
     <SPayButton>
-      <h4>Оплатить Через</h4>
+      <h4>Оплатить через</h4>
       <img src={img} alt="" />
     </SPayButton>
   );
