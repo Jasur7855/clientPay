@@ -6,7 +6,7 @@ interface ISaleTime {
   saleStatus: "paid" | boolean | "saleTime";
   timeOut: boolean;
   complate: () => void;
-  saleFinish: string;
+  saleFinish: any;
 }
 
 const SaleTime = React.memo(
@@ -31,13 +31,15 @@ const SaleTime = React.memo(
       );
     }
 
-    const saleEndTime = new Date(saleFinish).getTime();
-
+    
+   
+    console.log(saleFinish);
+    
     return (
       <SSaleTime>
         <Countdown
           key={key}
-          date={saleEndTime}
+          date={saleFinish} 
           onComplete={complate}
           renderer={({ hours, minutes, seconds }) => (
             <div className="timeWrapper">
