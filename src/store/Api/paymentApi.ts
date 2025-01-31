@@ -19,6 +19,12 @@ interface IGetInvoiceByIdResponse {
   data: IInvoice;
   message: string;
 }
+interface IPaymentUserLinkPayload{
+  invoice_id:string
+}
+interface IPaymentUserLinkResponse{
+  link:string
+}
 
 export const paymentApi = createApi({
   reducerPath: "paymentApi",
@@ -27,8 +33,18 @@ export const paymentApi = createApi({
     getInvoiceById: builder.query<IGetInvoiceByIdResponse, string>({
       query: (invoiceId) => `payment/${invoiceId}`,
     }),
+    paymentUserLink: builder.mutation<IPaymentUserLinkResponse,IPaymentUserLinkPayload>({
+      query: (payload) => ({
+        url: "/payme-link",
+        method: "POST",
+        body: payload,
+      }),
+    }),
   }),
 });
 
-export const { useGetInvoiceByIdQuery, useLazyGetInvoiceByIdQuery } =
-  paymentApi;
+export const {
+  useGetInvoiceByIdQuery,
+  useLazyGetInvoiceByIdQuery,
+  usePaymentUserLinkMutation,
+} = paymentApi;

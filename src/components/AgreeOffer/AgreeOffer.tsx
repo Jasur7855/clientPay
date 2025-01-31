@@ -30,7 +30,7 @@ export const AgreeOffer = ({ isChecked, onChange, link }: IAgreeOffer) => {
             <path
               d="M13 1C11.3411 4.27599 8.35157 8.60815 5.43362 10.3327L1 5.11139"
               stroke="black"
-              stroke-width="2"
+              strokeWidth="2"
             />
           </svg>
         </StyledCheckbox>

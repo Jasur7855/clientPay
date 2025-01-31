@@ -4,7 +4,10 @@ import { TextContainer } from "./components/textContainer/TextContainer";
 import { PayButton } from "./components/PayButton/PayButton";
 import SaleTime from "./components/SaleTime/SaleTime";
 import { AgreeOffer } from "./components/AgreeOffer/AgreeOffer";
-import { useGetInvoiceByIdQuery } from "./store/Api/paymentApi";
+import {
+  usePaymentUserLinkMutation,
+  useGetInvoiceByIdQuery,
+} from "./store/Api/paymentApi";
 
 const getUrlParam = (): string | null => {
   const path = window.location.pathname;
@@ -15,12 +18,12 @@ const getUrlParam = (): string | null => {
 function App() {
   const [offer, setOffer] = useState<boolean>(false);
   const [isTimeOut, setIsTimeOut] = useState(false);
-  const numberWithSpaces = function (x:number):string {
+  const numberWithSpaces = function (x: number): string {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
   const id = getUrlParam();
   const { data } = useGetInvoiceByIdQuery(id as string);
-
+  const [getPaymentLink, { data: paymentData }] = usePaymentUserLinkMutation();
   let deadline: string | null = null;
   if (data?.data?.deadline) {
     const timestamp = Number(data.data.deadline) * 1000;
@@ -30,7 +33,19 @@ function App() {
   const handleOfferChange = () => {
     setOffer(!offer);
   };
-
+  const handleUserPayLink = async () => {
+    if (!id) {
+      console.error("Ошибка: ID платежа отсутствует");
+      return;
+    }
+    try {
+      const response = await getPaymentLink({ invoice_id: id }).unwrap();
+      console.log("Ссылка для оплаты:", response.link);
+      window.location.href = response.link;
+    } catch (err) {
+      console.error("Ошибка при получении ссылки:", err);
+    }
+  };
   return (
     <div className="App">
       <img className="logo" src="/image/Group.svg" alt="" />
@@ -58,22 +73,26 @@ function App() {
           />
           <TextContainer
             subTitle="Общая стоимость обучения:"
-            title={`${numberWithSpaces(data?.data.final_price??0)} СУМ`}
+            title={`${numberWithSpaces(data?.data.final_price ?? 0)} СУМ`}
           />
           <TextContainer
             subTitle="Сумма к оплате:"
-            title={`${numberWithSpaces(data?.data.sum??0)} СУМ`}
+            title={`${numberWithSpaces(data?.data.sum ?? 0)} СУМ`}
             textClass="yellow"
           />
           <TextContainer
             subTitle="Остаток:"
-            title={`${numberWithSpaces(data?.data.remainder??0)} СУМ`}
+            title={`${numberWithSpaces(data?.data.remainder ?? 0)} СУМ`}
           />
 
-          <AgreeOffer isChecked={offer} link="https://thnkm.uz/oferta" onChange={handleOfferChange} />
+          <AgreeOffer
+            isChecked={offer}
+            link="https://thnkm.uz/oferta"
+            onChange={handleOfferChange}
+          />
           {offer && !isTimeOut && (
             <div className="paymentContainer">
-              <PayButton img="/svg/Payment1.svg" />
+              <PayButton onClick={handleUserPayLink} img="/svg/Payment1.svg" />
               {/* <PayButton img="/svg/Payment2.svg" />
               <PayButton img="/svg/Payment3.svg" /> */}
             </div>
