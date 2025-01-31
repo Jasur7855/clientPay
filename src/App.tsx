@@ -22,8 +22,22 @@ function App() {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
   const id = getUrlParam();
-  const { data } = useGetInvoiceByIdQuery(id as string);
+  console.log(id);
+
+  const { data,error,isError } = useGetInvoiceByIdQuery(id as string);
   const [getPaymentLink, { data: paymentData }] = usePaymentUserLinkMutation();
+
+  if (!id) return <div className="errorText"> ошибка платежа !</div>;
+  if(isError){
+    if ("status" in error && error.status === 400) {
+      return <div className="errorText">Платеж истек!</div>;
+    }
+    if ("status" in error && error.status === 404) {
+      return <div className="errorText">Платеж не найден </div>;
+    }
+  }
+  
+
   let deadline: string | null = null;
   if (data?.data?.deadline) {
     const timestamp = Number(data.data.deadline) * 1000;
@@ -40,12 +54,12 @@ function App() {
     }
     try {
       const response = await getPaymentLink({ invoice_id: id }).unwrap();
-      console.log("Ссылка для оплаты:", response.link);
       window.location.href = response.link;
     } catch (err) {
       console.error("Ошибка при получении ссылки:", err);
     }
   };
+  
   return (
     <div className="App">
       <img className="logo" src="/image/Group.svg" alt="" />
