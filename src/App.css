@@ -58,6 +58,8 @@ h3 {
   height: 100%;
 }
 .errorText{
+  padding: 0 24px;
+  text-align: center;
   width: 100%;
   min-height: 100vh;
   display: flex;

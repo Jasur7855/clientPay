@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import "./App.css";
 import { TextContainer } from "./components/textContainer/TextContainer";
 import { PayButton } from "./components/PayButton/PayButton";
@@ -8,39 +8,32 @@ import {
   usePaymentUserLinkMutation,
   useGetInvoiceByIdQuery,
 } from "./store/Api/paymentApi";
-
-const getUrlParam = (): string | null => {
-  return window.location.pathname.split("/").pop() || null;
-};
+import { Loader } from "./components/Loader/Loader";
 
 function App() {
+  const getUrlParam = (): string | null => {
+    const param = window.location.pathname.split("/").pop();
+    return param && param !== "" ? param : null;
+  };
+
   const [offer, setOffer] = useState(false);
   const [isTimeOut, setIsTimeOut] = useState(false);
   const id = getUrlParam();
-  
-  const { data, error, isError } = useGetInvoiceByIdQuery(id as string);
+  if (!id) {
+    return (
+     <Loader />
+    );
+  }
+  const { data, error, isError, isLoading } = useGetInvoiceByIdQuery(id);
   const [getPaymentLink] = usePaymentUserLinkMutation();
 
-  // Функция для обработки ошибок API
-  const renderError = () => {
-    if (!id) return "Ошибка платежа!";
-    if (isError) {
-      if ("status" in error) {
-        if (error.status === 400) return "Платеж истек!";
-        if (error.status === 404) return "Платеж не найден";
-      }
-      return "Ошибка загрузки данных";
-    }
-    return null;
-  };
+  useEffect(() => {}, [error]);
 
-  const errorMessage = renderError();
-  if (errorMessage) return <div className="errorText">{errorMessage}</div>;
+  const numberWithSpaces = useMemo(
+    () => (x: number) => x.toLocaleString("ru-RU"),
+    []
+  );
 
-  // Оптимизированная функция форматирования чисел
-  const numberWithSpaces = (x: number) => x.toLocaleString("ru-RU");
-
-  // Оптимизированный расчет deadline (мемоизирован)
   const deadline = useMemo(() => {
     if (!data?.data?.deadline) return null;
     return new Date(Number(data.data.deadline) * 1000).toISOString();
@@ -48,12 +41,37 @@ function App() {
 
   const handleOfferChange = () => setOffer((prev) => !prev);
 
-  const handleUserPayLink = async () => {
-    if (!id) return console.error("Ошибка: ID платежа отсутствует");
+  if (isLoading) {
+    return <Loader />;
+  }
 
+  if (isError) {
+    if ("status" in error && error.status === 400) {
+      return (
+        <div className="App">
+          <img className="logo" src="/image/Group.svg" alt="Логотип" />
+          <div className="errorText">Cрок действия платежа истек</div>
+        </div>
+      );
+    }
+    if ("status" in error && error.status === 404) {
+      return (
+        <div className="App">
+          <img className="logo" src="/image/Group.svg" alt="Логотип" />
+          <div className="errorText"> платеж не найден </div>
+        </div>
+      );
+    } else {<div> Загрузка,,,</div>}
+  }
+
+  const handleUserPayLink = async () => {
     try {
       const response = await getPaymentLink({ invoice_id: id }).unwrap();
-      window.location.href = response.link;
+      if (response?.link) {
+        window.location.href = response.link;
+      } else {
+        console.error("Ссылка для оплаты не получена");
+      }
     } catch (err) {
       console.error("Ошибка при получении ссылки:", err);
     }
@@ -75,13 +93,37 @@ function App() {
 
         <div className={`timer ${isTimeOut ? "opacity" : ""}`}>
           {isTimeOut && <div className="disabled" />}
-          <TextContainer subTitle="Имя студента:" title={`${data?.data.name} ${data?.data.last_name}`} />
-          <TextContainer subTitle="Курс и номер потока:" title={`${data?.data.course_name} / ${data?.data.thread}`} />
-          <TextContainer subTitle="Общая стоимость обучения:" title={`${numberWithSpaces(data?.data.final_price ?? 0)} СУМ`} />
-          <TextContainer subTitle="Сумма к оплате:" title={`${numberWithSpaces(data?.data.sum ?? 0)} СУМ`} textClass="yellow" />
-          <TextContainer subTitle="Остаток:" title={`${numberWithSpaces(data?.data.remainder ?? 0)} СУМ`} />
+          <TextContainer
+            subTitle="Имя студента:"
+            title={`${data?.data?.name ?? "Неизвестно"} ${
+              data?.data?.last_name ?? ""
+            }`}
+          />
+          <TextContainer
+            subTitle="Курс и номер потока:"
+            title={`${data?.data?.course_name ?? ""} / ${
+              data?.data?.thread ?? ""
+            }`}
+          />
+          <TextContainer
+            subTitle="Общая стоимость обучения:"
+            title={`${numberWithSpaces(data?.data?.final_price ?? 0)} СУМ`}
+          />
+          <TextContainer
+            subTitle="Сумма к оплате:"
+            title={`${numberWithSpaces(data?.data?.sum ?? 0)} СУМ`}
+            textClass="yellow"
+          />
+          <TextContainer
+            subTitle="Остаток:"
+            title={`${numberWithSpaces(data?.data?.remainder ?? 0)} СУМ`}
+          />
 
-          <AgreeOffer isChecked={offer} link="https://thnkm.uz/oferta" onChange={handleOfferChange} />
+          <AgreeOffer
+            isChecked={offer}
+            link="https://thnkm.uz/oferta"
+            onChange={handleOfferChange}
+          />
           {offer && !isTimeOut && (
             <div className="paymentContainer">
               <PayButton onClick={handleUserPayLink} img="/svg/Payment1.svg" />
