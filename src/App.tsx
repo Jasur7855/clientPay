@@ -1,4 +1,4 @@
-import { useState, useMemo,  useRef } from "react";
+import { useState, useMemo, useRef } from "react";
 import "./App.css";
 import { TextContainer } from "./components/textContainer/TextContainer";
 import { PayButton } from "./components/PayButton/PayButton";
@@ -9,7 +9,8 @@ import {
   useGetInvoiceByIdQuery,
 } from "./store/Api/paymentApi";
 import { Loader } from "./components/Loader/Loader";
-
+import { IGetInvoiceByIdResponse } from "./store/Api/paymentApi";
+import { SSaleTime } from "./components/SaleTime/SaleTime.style";
 function App() {
   const [isLoadingPayment, setIsLoadingPayment] = useState(false);
   const [offer, setOffer] = useState(false);
@@ -26,8 +27,10 @@ function App() {
     return <Loader />;
   }
 
-  const { data, error, isError, isLoading} = useGetInvoiceByIdQuery(id);
-  const [getPaymentLink,{ isLoading:linkLoad, isSuccess }] = usePaymentUserLinkMutation();
+  const { data, error, isError, isLoading, isFetching } =
+    useGetInvoiceByIdQuery(id);
+  const [getPaymentLink, { isLoading: linkLoad }] =
+    usePaymentUserLinkMutation();
 
   const paymentRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,16 +47,13 @@ function App() {
 
   const handleOfferChange = () => {
     setOffer((prev) => !prev);
-
     setTimeout(() => {
-      if (paymentRef.current) {
-        paymentRef.current.scrollIntoView({ behavior: "smooth" });
-      }
+      paymentRef.current?.scrollIntoView({ behavior: "smooth" });
     }, 0);
   };
 
   const handleUserPayLink = async () => {
-    setIsLoadingPayment(true); 
+    setIsLoadingPayment(true);
     setIsRedirecting(true);
     try {
       const response = await getPaymentLink({ invoice_id: id }).unwrap();
@@ -71,28 +71,148 @@ function App() {
     }
   };
 
-  if (linkLoad || isLoadingPayment || isRedirecting ||isLoading ||isSuccess ) {
+  if (
+    linkLoad ||
+    isLoadingPayment ||
+    isRedirecting ||
+    isLoading ||
+    isFetching
+  ) {
     return <Loader />;
   }
 
-  if (isError) {
-    if ("status" in error && error.status === 400) {
-      return (
-        <div className="App">
-          <img className="logo" src="/image/Group.svg" alt="Логотип" />
-          <div className="errorText">Cрок действия платежа истек</div>
-        </div>
-      );
-    }
-    if ("status" in error && error.status === 404) {
+  if (isError && error && "status" in error) {
+    if (error.status === 404) {
       return (
         <div className="App">
           <img className="logo" src="/image/Group.svg" alt="Логотип" />
           <div className="errorText">Платеж не найден</div>
         </div>
       );
-    } else {
-      return <div>Загрузка...</div>;
+    }
+
+    if (error.status === 400) {
+      const errorData = error.data as IGetInvoiceByIdResponse;
+      console.log(errorData);
+
+      return (
+        <div className="App">
+          <img className="logo" src="/image/Group.svg" alt="Логотип" />
+          <div className="main">
+            <img src="/image/Header.png" alt="Заголовок" className="checkImg" />
+
+            <SSaleTime>
+              <h3>
+                Срок для оплаты
+                <br /> по счёту истёк :(
+              </h3>
+            </SSaleTime>
+
+            <div className={`timer ${isTimeOut ? "opacity" : ""}`}>
+              <div className="disabled" />
+
+              <TextContainer
+                subTitle="Имя студента:"
+                title={`${errorData?.data?.name ?? "Неизвестно"} ${
+                  data?.data?.last_name ?? ""
+                }`}
+              />
+              <TextContainer
+                subTitle="Курс и номер потока:"
+                title={`${errorData?.data?.course_name ?? ""} / ${
+                  errorData?.data?.thread ?? ""
+                }`}
+              />
+              <TextContainer
+                subTitle="Общая стоимость обучения:"
+                title={`${numberWithSpaces(
+                  errorData?.data?.final_price ?? 0
+                )} СУМ`}
+              />
+              <TextContainer
+                subTitle="Сумма к оплате:"
+                title={`${numberWithSpaces(errorData?.data?.sum ?? 0)} СУМ`}
+                textClass="yellow"
+              />
+              <TextContainer
+                subTitle="Остаток:"
+                title={`${numberWithSpaces(
+                  errorData?.data?.remainder ?? 0
+                )} СУМ`}
+              />
+
+              <AgreeOffer
+                isChecked={true}
+                link="https://thnkm.uz/oferta"
+                onChange={handleOfferChange}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    if (error.status === 403) {
+      const errorData = error.data as IGetInvoiceByIdResponse;
+      console.log(errorData);
+      return (
+        <div className="App">
+          <img className="logo" src="/image/Group.svg" alt="Логотип" />
+          <div className="main">
+            <img src="/image/Header.png" alt="Заголовок" className="checkImg" />
+
+            {errorData?.data && deadline && (
+              <SaleTime
+                saleFinish={deadline}
+                saleStatus="saleTime"
+                complate={() => setIsTimeOut(true)}
+                timeOut={isTimeOut}
+              />
+            )}
+
+            <div className={`timer ${isTimeOut ? "opacity" : ""}`}>
+              {isTimeOut && <div className="disabled" />}
+
+              <TextContainer
+                subTitle="Имя студента:"
+                title={`${errorData?.data?.name ?? "Неизвестно"} ${
+                  data?.data?.last_name ?? ""
+                }`}
+              />
+              <TextContainer
+                subTitle="Курс и номер потока:"
+                title={`${errorData?.data?.course_name ?? ""} / ${
+                  errorData?.data?.thread ?? ""
+                }`}
+              />
+              <TextContainer
+                subTitle="Общая стоимость обучения:"
+                title={`${numberWithSpaces(
+                  errorData?.data?.final_price ?? 0
+                )} СУМ`}
+              />
+              <TextContainer
+                subTitle="Сумма к оплате:"
+                title={`${numberWithSpaces(errorData?.data?.sum ?? 0)} СУМ`}
+                textClass="yellow"
+              />
+              <TextContainer
+                subTitle="Остаток:"
+                title={`${numberWithSpaces(
+                  errorData?.data?.remainder ?? 0
+                )} СУМ`}
+              />
+
+              <AgreeOffer
+                isChecked={true}
+                link="https://thnkm.uz/oferta"
+                onChange={handleOfferChange}
+              />
+              <img src="/image/paid.png" alt="Заголовок" className="checkImg" />
+            </div>
+          </div>
+        </div>
+      );
     }
   }
 
@@ -116,11 +236,15 @@ function App() {
 
           <TextContainer
             subTitle="Имя студента:"
-            title={`${data?.data?.name ?? "Неизвестно"} ${data?.data?.last_name ?? ""}`}
+            title={`${data?.data?.name ?? "Неизвестно"} ${
+              data?.data?.last_name ?? ""
+            }`}
           />
           <TextContainer
             subTitle="Курс и номер потока:"
-            title={`${data?.data?.course_name ?? ""} / ${data?.data?.thread ?? ""}`}
+            title={`${data?.data?.course_name ?? ""} / ${
+              data?.data?.thread ?? ""
+            }`}
           />
           <TextContainer
             subTitle="Общая стоимость обучения:"

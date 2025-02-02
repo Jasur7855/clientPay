@@ -30,11 +30,6 @@ const SaleTime = React.memo(
         </SSaleTime>
       );
     }
-
-    
-   
-    console.log(saleFinish);
-    
     return (
       <SSaleTime>
         <Countdown
