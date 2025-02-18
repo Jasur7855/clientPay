@@ -143,7 +143,7 @@ function App() {
 
               <AgreeOffer
                 isChecked={true}
-                link="https://thnkm.uz/oferta"
+                link="http://thnkm.uz/oferta"
                 onChange={handleOfferChange}
               />
             </div>

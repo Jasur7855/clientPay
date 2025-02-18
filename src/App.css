@@ -12,8 +12,8 @@
   position: relative;
   width: 100%;
   height: 100vh;
-  background: url("/public/image/bg$left.png") no-repeat left bottom,
-    url("/public/image/bg$Right.png") no-repeat right top 20px;
+  background: url("/image/bg$left.png") no-repeat left bottom,
+    url("/image/bg$Right.png") no-repeat right top 20px;
   padding: 40px 26px;
 }
 .checkImg {
