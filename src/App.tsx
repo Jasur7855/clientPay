@@ -268,7 +268,7 @@ function App() {
 
           {offer && !isTimeOut && (
             <div ref={paymentRef} className="paymentContainer">
-              <PayButton onClick={handleUserPayLink} img="/image/payme.png" />
+              <PayButton onClick={handleUserPayLink} img="/svg/payme_color.svg" />
             </div>
           )}
         </div>
