@@ -205,7 +205,7 @@ function App() {
 
               <AgreeOffer
                 isChecked={true}
-                link="https://thnkm.uz/oferta"
+                link="http://thnkm.uz/oferta"
                 onChange={handleOfferChange}
               />
               <img src="/image/paid.png" alt="Заголовок" className="checkImg" />
@@ -262,7 +262,7 @@ function App() {
 
           <AgreeOffer
             isChecked={offer}
-            link="https://thnkm.uz/oferta"
+            link="http://thnkm.uz/oferta"
             onChange={handleOfferChange}
           />
 
